@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ByteCraft - Java Code Editor</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Monaco Editor loader -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+    <header>
+        <div style="display: flex; align-items: center; gap: 2rem;">
+            <h1>ByteCraft</h1>
+            <div class="tabs">
+                <button class="tab-btn active" id="tab-java">Java Editor</button>
+                <div class="dropdown">
+                    <button class="tab-btn" id="tab-formatter">Formatter</button>
+                    <div class="dropdown-content">
+                        <a href="#" data-mode="json">JSON</a>
+                        <a href="#" data-mode="xml">XML</a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="tab-btn" id="tab-converter">Converter</button>
+                    <div class="dropdown-content">
+                        <a href="#" data-mode="json2xml">JSON to XML</a>
+                        <a href="#" data-mode="xml2json">XML to JSON</a>
+                    </div>
+                </div>
+                <button class="tab-btn" id="tab-jolt">JOLT Processor</button>
+                <div class="dropdown">
+                    <button class="tab-btn" id="tab-theme" title="Change Theme">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 2a14.5 14.5 0 0 0 0 20 10 10 0 0 1 2-20"></path>
+                        </svg>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="#" data-theme="dark">Dark (Default)</a>
+                        <a href="#" data-theme="light">Light</a>
+                        <a href="#" data-theme="sunset">Sunset</a>
+                        <a href="#" data-theme="lavender">Lavender</a>
+                        <a href="#" data-theme="solarized">Solarized Light</a>
+                        <a href="#" data-theme="oceanic">Oceanic</a>
+                        <a href="#" data-theme="dracula">Dracula</a>
+                        <a href="#" data-theme="forest">Forest</a>
+                        <a href="#" data-theme="cyberpunk">Cyberpunk</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="actions" id="action-container">
+            <button id="run-btn" class="run-button">Run Code <span class="play-icon">▶</span></button>
+        </div>
+    </header>
+
+    <div class="editor-container">
+        <div id="editor"></div>
+        <button class="copy-btn floating-copy-btn" id="editor-clear-btn" onclick="clearContent('editor')" title="Clear Content" style="top: 10px; right: 60px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+        </button>
+        <button class="copy-btn floating-copy-btn" id="editor-copy-btn" onclick="copyToClipboard('editor-content')" title="Copy to Clipboard" style="top: 10px; right: 20px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+        </button>
+        <div id="jolt-container" style="display: none; height: 100%; display: flex;">
+            <div style="flex: 1; display: flex; flex-direction: column; border-right: 1px solid var(--border-color); position: relative;">
+                <div class="panel-header">
+                    Input JSON
+                    <div>
+                        <button class="copy-btn" onclick="clearContent('jolt-input')" title="Clear Content">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </button>
+                        <button class="copy-btn" onclick="copyToClipboard('jolt-input-content')" title="Copy to Clipboard">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="jolt-input" style="flex: 1;"></div>
+            </div>
+            <div style="flex: 1; display: flex; flex-direction: column; position: relative;">
+                <div class="panel-header">
+                    JOLT Spec
+                    <div>
+                        <button class="copy-btn" onclick="clearContent('jolt-spec')" title="Clear Content">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </button>
+                        <button class="copy-btn" onclick="copyToClipboard('jolt-spec-content')" title="Copy to Clipboard">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="jolt-spec" style="flex: 1;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="resizer" id="resizer"></div>
+
+    <div class="output-container" id="output-container">
+        <div class="output-header">
+            <h3>Output</h3>
+            <span id="status" class="status">Ready</span>
+        </div>
+        <button class="copy-btn floating-copy-btn" onclick="copyToClipboard('output')" title="Copy to Clipboard">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+        </button>
+        <pre id="output"></pre>
+    </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
